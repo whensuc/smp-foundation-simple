@@ -7,6 +7,108 @@
     <groupId>com.dyg</groupId>
     <artifactId>smp-foundation-simple</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>smp-foundation-simple</name>
+    <url>https://github.com/whensuc/smp-foundation-simple</url>
+    <!-- 项目的描述, Maven 产生的文档用 -->
+    <description>a project for fast develop springboot+mybatis.</description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <!-- 加载nexus私服 -->
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>releases</name>
+            <url>http://192.168.22.95:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>snapshots</name>
+            <url>http://192.168.22.95:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <dependencies>
+    <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.11</version>
+    </dependency>
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.14</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+        </resources>
+        <plugins>
+
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+
+    </build>
+    <!-- 开源签名证书 -->
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <!-- 仓库信息 -->
+    <scm>
+        <connection>scm:git:git@github.com:whensuc/smp-foundation.git</connection>
+        <developerConnection>scm:git:git@github.com:whensuc/smp-foundation.git
+        </developerConnection>
+        <url>http://github.com/xiaoxuetu/multithreadpool-spring-boot-starter/tree/master</url>
+    </scm>
+
+    <!-- 开发人员信息 -->
+    <developers>
+        <developer>
+            <name>when</name>
+            <email>773776852@qq.com</email>
+        </developer>
+    </developers>
 
 </project>
