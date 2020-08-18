@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import cn.com.dyg.work.common.BusinessException;
 import org.apache.http.NameValuePair;
@@ -21,6 +22,10 @@ import org.apache.http.util.EntityUtils;
 
 
 public class HttpClientRequest {
+
+	public static final String TYPE_FORM = "form";
+	public static final String TYPE_JSON = "json";
+	public static final String TYPE_XML = "xml";
 
 	private static HttpClientRequest  instance;
 	private CloseableHttpClient httpClient;
@@ -107,34 +112,75 @@ public class HttpClientRequest {
         }
 	}
 
+	public String post(String url,Map<String,String> headerparam,Map<String,String> params)throws BusinessException{
+
+		//CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse response = null;
+		String resultString = "";
+		HttpPost httpPost = new HttpPost(url);
+		try{
+
+//			RequestConfig config = RequestConfig.custom().setConnectTimeout(1000) //连接超时时间
+//					.setConnectionRequestTimeout(1000) //从连接池中取的连接的最长时间
+//					.setSocketTimeout(10 *1000) //数据传输的超时时间
+					//.setStaleConnectionCheckEnabled(true) //提交请求前测试连接是否可用
+//					.build();
+//			httpPost.setConfig(config);
+			Optional.ofNullable(headerparam).ifPresent(h->{
+				for(String key : headerparam.keySet()){
+					httpPost.addHeader(key,headerparam.get(key));
+				}
+			});
+			// 创建参数列表
+			if (params != null) {
+				List<NameValuePair> paramList = new ArrayList<NameValuePair>();
+				for (String key : params.keySet()) {
+					paramList.add(new BasicNameValuePair(key, params.get(key)));
+				}
+				// 模拟表单
+				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(paramList,"utf-8");
+				httpPost.setEntity(entity);
+			}
+			// 执行http请求
+			response = httpClient.execute(httpPost);
+
+			resultString = EntityUtils.toString(response.getEntity(), "utf-8");
+		}catch(Exception e){
+			throw new BusinessException(e.getMessage());
+		}finally{
+			close(response,httpPost);
+		}
+		return resultString;
+	}
+
 	public String post(String url,Map<String,String> params)throws BusinessException{
 
 		//CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = null;
 		String resultString = "";
 		HttpPost httpPost = null;
-        try{
-		httpPost = new HttpPost(url);
-		// 创建参数列表
-		if (params != null) {
-			List<NameValuePair> paramList = new ArrayList<NameValuePair>();
-			for (String key : params.keySet()) {
-				paramList.add(new BasicNameValuePair(key, params.get(key)));
+		try{
+			httpPost = new HttpPost(url);
+			// 创建参数列表
+			if (params != null) {
+				List<NameValuePair> paramList = new ArrayList<NameValuePair>();
+				for (String key : params.keySet()) {
+					paramList.add(new BasicNameValuePair(key, params.get(key)));
+				}
+				// 模拟表单
+				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(paramList,"utf-8");
+				httpPost.setEntity(entity);
 			}
-			// 模拟表单
-			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(paramList,"utf-8");
-			httpPost.setEntity(entity);
-		}
-		// 执行http请求
-		response = httpClient.execute(httpPost);
+			// 执行http请求
+			response = httpClient.execute(httpPost);
 
-		resultString = EntityUtils.toString(response.getEntity(), "utf-8");
-        }catch(Exception e){
-        	throw new BusinessException(e.getMessage());
-        }finally{
+			resultString = EntityUtils.toString(response.getEntity(), "utf-8");
+		}catch(Exception e){
+			throw new BusinessException(e.getMessage());
+		}finally{
 			close(response,httpPost);
-        }
-        return resultString;
+		}
+		return resultString;
 	}
 
 
@@ -271,6 +317,65 @@ public class HttpClientRequest {
 			close(response,httpDel);
 		}
 		return resultString;
+	}
+
+	public  String postXml(String url, String xml,Map<String,String> headerparam) {
+		//CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse response = null;
+		String resultString = "";
+		HttpPost httpPost = new HttpPost(url);
+		try {
+			// 创建Http Post请求
+			RequestConfig config = RequestConfig.custom().setConnectTimeout(1000) //连接超时时间
+					.setConnectionRequestTimeout(1000) //从连接池中取的连接的最长时间
+					.setSocketTimeout(10 *1000) //数据传输的超时时间
+					//.setStaleConnectionCheckEnabled(true) //提交请求前测试连接是否可用
+					.build();
+			httpPost.setConfig(config);
+			Optional.ofNullable(headerparam).ifPresent(h->{
+				for(String key : headerparam.keySet()){
+					httpPost.addHeader(key,headerparam.get(key));
+				}
+			});
+
+			// 创建请求内容
+			StringEntity entity = new StringEntity(xml, ContentType.APPLICATION_XML);
+			httpPost.setEntity(entity);
+			// 执行http请求
+			response = httpClient.execute(httpPost);
+			resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BusinessException(e.getMessage());
+		}finally{
+			close(response,httpPost);
+		}
+		return resultString;
+	}
+
+	public  String  request(String url,String method,Map<String,String> headerparam,
+							String type,Map<String,String> formparam,String bodyparam) {
+		String result = null;
+		if("GET".equalsIgnoreCase(method)) {
+			result = get(url, headerparam);
+		}else if("POST".equalsIgnoreCase(method)) {
+			switch(type) {
+				case TYPE_FORM:
+					result = post(url,headerparam,formparam);
+					break;
+				case TYPE_JSON:
+					result = postJson(url,bodyparam,headerparam);
+					break;
+				case TYPE_XML:
+					result = postXml(url,bodyparam,headerparam);
+					break;
+			}
+		}else if("PUT".equalsIgnoreCase(method)) {
+			result = putJson(url,bodyparam,headerparam);
+		}else if("DELETE".equalsIgnoreCase(method)) {
+			result = delete(url,headerparam);
+		}
+		return result;
 	}
 
 	private void close(CloseableHttpResponse response,HttpRequestBase request){
