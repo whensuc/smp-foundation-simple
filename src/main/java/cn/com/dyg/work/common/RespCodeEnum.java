@@ -36,6 +36,7 @@ public enum RespCodeEnum {
 	EXPIRED_SIGNTURE("112","签名已过期"),
 	REQUEST_FAIL("201","请求失败"),
 	INVALID_USER("202","账户不可用"),
+	RESUBMIT("203","请勿重复提交"),
 
 	INVALID_OPERATION("801","无效的操作"),
 
