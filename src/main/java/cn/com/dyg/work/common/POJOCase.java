@@ -41,23 +41,20 @@ public class POJOCase {
 		}
 		try {
 			for (Field fd : fieldList_target) {
-				if (!fieldString_source.contains(fd.getName()))
+				String toFd = "";
+				if (fd.isAnnotationPresent(Adapter.class)) {
+					Adapter adapter = fd.getAnnotation(Adapter.class);
+					toFd = adapter.toCaseFild();
+				}
+				if (!fieldString_source.contains(fd.getName())&&!fieldString_source.contains(toFd))
 					continue;
-				PropertyDescriptor pd = new PropertyDescriptor(fd.getName(), source.getClass());
+				PropertyDescriptor pd = new PropertyDescriptor("".equals(toFd)?fd.getName():toFd, source.getClass());
 				Method getMethod = pd.getReadMethod();
 				if (getMethod != null) {
 					Object value = getMethod.invoke(source);
-					if (fd.isAnnotationPresent(Adapter.class)) {
-						Adapter adapter = fd.getAnnotation(Adapter.class);
-						String toFd = adapter.toCaseFild();
-						PropertyDescriptor pd2 = new PropertyDescriptor(toFd, target.getClass());
-						Method setMethod = pd2.getWriteMethod();
-						setMethod.invoke(target, value);
-					} else {
-						PropertyDescriptor pd2 = new PropertyDescriptor(fd.getName(), target.getClass());
-						Method setMethod = pd2.getWriteMethod();
-						setMethod.invoke(target, value);
-					}
+					PropertyDescriptor pd2 = new PropertyDescriptor(fd.getName(), target.getClass());
+					Method setMethod = pd2.getWriteMethod();
+					setMethod.invoke(target, value);
 
 				}
 			}
