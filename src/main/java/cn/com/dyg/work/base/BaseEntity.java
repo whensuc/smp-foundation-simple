@@ -1,6 +1,7 @@
 package cn.com.dyg.work.base;
 
 
+import cn.com.dyg.work.annotation.ZColumn;
 import cn.com.dyg.work.annotation.ZTable;
 
 import java.io.Serializable;
@@ -12,9 +13,9 @@ import java.time.format.DateTimeFormatter;
 
 @SuppressWarnings("serial")
 public abstract  class BaseEntity implements Serializable{
-	@ZTable(columnType="smallint",columnLength="1")
+	@ZColumn(columnType="smallint",columnLength="1")
 	private Integer dr;
-	@ZTable(columnType="varchar",columnLength="19")
+	@ZColumn(columnType="varchar",columnLength="19")
 	private String ts;
 
 	public BaseEntity() {
