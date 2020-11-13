@@ -14,12 +14,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE,ElementType.FIELD})
 @Retention (RetentionPolicy.RUNTIME)
 public @interface ZTable {
-	String columnType() default "";
-	String columnLength() default "";
-    String defaultValue() default "DEFAULT NULL";
-    String showName() default "";
-	boolean isPrimary()default false;
+
 	String tableName() default "";
-	String oldColumnName() default "";
-	boolean isAuto() default false;
+
 }
