@@ -13,6 +13,7 @@ import java.util.Map;
 
 
 import cn.com.dyg.work.annotation.DBField;
+import cn.com.dyg.work.annotation.ZColumn;
 import cn.com.dyg.work.annotation.ZTable;
 import cn.com.dyg.work.base.BaseEntity;
 import org.apache.ibatis.annotations.Param;
@@ -47,7 +48,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 			{
 				INSERT_INTO(t.getClass().getAnnotation(ZTable.class).tableName());
 				for (Field fd : fieldList) {
-					if (fd.isAnnotationPresent(ZTable.class)&&!fd.getAnnotation(ZTable.class).isAuto())
+					if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore()))
 						VALUES(fd.getName(), "#{" + fd.getName() + "}");
 				}
 
@@ -82,7 +83,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		sql.append("insert into " + cls.getAnnotation(ZTable.class).tableName() + "(");
 		cols.append("(");
 		for (Field fd : fieldList) {
-			if (fd.isAnnotationPresent(ZTable.class)&&!fd.getAnnotation(ZTable.class).isAuto()) {
+			if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
 				sql.append(fd.getName() + ",");
 				cols.append(MessageFormat.format("#'{'list[{0}].{1}'}'",
 						fd.getName()));
@@ -97,7 +98,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		for (int i = 0; i < list.size(); i++) {
 			sql.append("(");
 			for (Field fd : fieldList) {
-				if (fd.isAnnotationPresent(ZTable.class)&&!fd.getAnnotation(ZTable.class).isAuto()) {
+				if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
 					sql.append(MessageFormat.format("#'{'list[{0}].{1}'}'", i,
 							fd.getName()));
 					sql.append(",");
@@ -134,7 +135,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		sql.append("insert into " + cls.getAnnotation(ZTable.class).tableName() + "(");
 		cols.append("(");
 		for (Field fd : fieldList) {
-			if (fd.isAnnotationPresent(ZTable.class)&&!fd.getAnnotation(ZTable.class).isAuto()) {
+			if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
 				sql.append(fd.getName() + ",");
 				cols.append(MessageFormat.format("#'{'list[{0}].{1}'}'",
 						fd.getName()));
@@ -149,7 +150,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		for (int i = 0; i < list.size(); i++) {
 			sql.append(" select ");
 			for (Field fd : fieldList) {
-				if (fd.isAnnotationPresent(ZTable.class)&&!fd.getAnnotation(ZTable.class).isAuto()) {
+				if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
 					sql.append(MessageFormat.format("#'{'list[{0}].{1}'}'", i,
 							fd.getName()));
 					sql.append(",");
@@ -185,7 +186,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 				String primary = "";
 				UPDATE(t.getClass().getAnnotation(ZTable.class).tableName());
 				for (Field fd : fieldList) {
-					if(fd.isAnnotationPresent(ZTable.class)&&fd.getAnnotation(ZTable.class).isPrimary())primary = fd.getName();
+					if(fd.isAnnotationPresent(ZColumn.class)&&fd.getAnnotation(ZColumn.class).isPrimary())primary = fd.getName();
 					if (!"id".equals(fd.getName())
 							&& !fd.isAnnotationPresent(DBField.class)&&!fd.getName().equals(primary)) {
 						PropertyDescriptor pd = new PropertyDescriptor(
@@ -222,7 +223,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 			sql.append("update ").append(cls.getAnnotation(ZTable.class).tableName()).append(" set ");
 			String primary = "";
 			for (Field fd : fieldList) {
-				if(fd.isAnnotationPresent(ZTable.class)&&fd.getAnnotation(ZTable.class).isPrimary())primary=fd.getName();
+				if(fd.isAnnotationPresent(ZColumn.class)&&fd.getAnnotation(ZColumn.class).isPrimary())primary=fd.getName();
 				if (!fd.isAnnotationPresent(DBField.class) && !fd.getName().equals(primary)) {
 					sql.append(MessageFormat.format(fd.getName() + "= #'{'list[{0}].{1}'}'", i, fd.getName()));
 					sql.append(",");
@@ -259,7 +260,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		sql.UPDATE(t.getClass().getAnnotation(ZTable.class).tableName());
 		String primary = "";
 		for (Field fd : fieldList) {
-			if(fd.isAnnotationPresent(ZTable.class)&&fd.getAnnotation(ZTable.class).isPrimary())primary=fd.getName();
+			if(fd.isAnnotationPresent(ZColumn.class)&&fd.getAnnotation(ZColumn.class).isPrimary())primary=fd.getName();
 			if (!fd.isAnnotationPresent(DBField.class) && !fd.getName().equals(primary)) {
 				sql.SET(fd.getName() + "=#{" + fd.getName() + "}");
 			}else if(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isWhere()){
@@ -540,28 +541,28 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		sql.append("create table "+t.getClass().getAnnotation(ZTable.class).tableName()+"(");
 		String primary = "";
 		for(Field fd:fieldList){
-			if(fd.getAnnotation(ZTable.class).isPrimary()&&fd.getAnnotation(ZTable.class).isAuto()){
-				if(StringUtils.isEmpty(fd.getAnnotation(ZTable.class).columnType())){
+			if(fd.getAnnotation(ZColumn.class).isPrimary()&&fd.getAnnotation(ZColumn.class).isAuto()){
+				if(StringUtils.isEmpty(fd.getAnnotation(ZColumn.class).columnType())){
 					sql.append(fd.getName()+" int(11)  NOT NULL AUTO_INCREMENT,");
 				}else{
-					String columntype = fd.getAnnotation(ZTable.class).columnType();
-					String columnlength = fd.getAnnotation(ZTable.class).columnLength();
+					String columntype = fd.getAnnotation(ZColumn.class).columnType();
+					String columnlength = fd.getAnnotation(ZColumn.class).columnLength();
 					String type = StringUtils.isEmpty(columnlength)?columntype+" ":columntype+"("+columnlength+") ";
 					sql.append(fd.getName()+" "+type+"   NOT NULL AUTO_INCREMENT,");
 				}
 
 				primary = fd.getName();
-			}else if(fd.getAnnotation(ZTable.class).isPrimary()){
-				String columntype = fd.getAnnotation(ZTable.class).columnType();
-				String columnlength = fd.getAnnotation(ZTable.class).columnLength();
+			}else if(fd.getAnnotation(ZColumn.class).isPrimary()){
+				String columntype = fd.getAnnotation(ZColumn.class).columnType();
+				String columnlength = fd.getAnnotation(ZColumn.class).columnLength();
 				String type = StringUtils.isEmpty(columnlength)?columntype:columntype+"("+columnlength+") ";
 				sql.append(fd.getName()+" "+type+" NOT NULL ,");
 				primary = fd.getName();
 			}else{
 				if(fd.isAnnotationPresent(ZTable.class)){
-					String columntype = fd.getAnnotation(ZTable.class).columnType();
-					String columnlength = fd.getAnnotation(ZTable.class).columnLength();
-					String defaultValue = fd.getAnnotation(ZTable.class).defaultValue();
+					String columntype = fd.getAnnotation(ZColumn.class).columnType();
+					String columnlength = fd.getAnnotation(ZColumn.class).columnLength();
+					String defaultValue = fd.getAnnotation(ZColumn.class).defaultValue();
 					String type = StringUtils.isEmpty(columnlength)?columntype+" ":columntype+"("+columnlength+") ";
 					sql.append(fd.getName()+" "+type+defaultValue+",");
 				}
@@ -583,18 +584,18 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		sql.append("create table "+t.getClass().getAnnotation(ZTable.class).tableName()+"(");
 		String primary = "";
 		for(Field fd:fieldList){
-			if(fd.getAnnotation(ZTable.class).isPrimary()){
-				String columntype = fd.getAnnotation(ZTable.class).columnType();
-				String columnlength = fd.getAnnotation(ZTable.class).columnLength();
+			if(fd.getAnnotation(ZColumn.class).isPrimary()){
+				String columntype = fd.getAnnotation(ZColumn.class).columnType();
+				String columnlength = fd.getAnnotation(ZColumn.class).columnLength();
 				String type = StringUtils.isEmpty(columnlength)?columntype:columntype+"("+columnlength+") ";
 				sql.append(fd.getName()+" "+type+" NOT NULL ,");
 				primary = fd.getName();
 			}else{
-				if(fd.isAnnotationPresent(ZTable.class)){
-					String columntype = fd.getAnnotation(ZTable.class).columnType();
+				if(fd.isAnnotationPresent(ZColumn.class)){
+					String columntype = fd.getAnnotation(ZColumn.class).columnType();
 					if(columntype.contains("int"))columntype = "number";
-					String columnlength = fd.getAnnotation(ZTable.class).columnLength();
-					String defaultValue = fd.getAnnotation(ZTable.class).defaultValue();
+					String columnlength = fd.getAnnotation(ZColumn.class).columnLength();
+					String defaultValue = fd.getAnnotation(ZColumn.class).defaultValue();
 					String type = StringUtils.isEmpty(columnlength)?columntype+" ":columntype+"("+columnlength+") ";
 					sql.append(fd.getName()+" "+type+defaultValue+",");
 				}
