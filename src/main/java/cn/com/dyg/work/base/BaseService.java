@@ -140,7 +140,7 @@ public abstract class BaseService<T extends BaseEntity> {
                 {
                     INSERT_INTO(t.getClass().getAnnotation(ZTable.class).tableName());
                     for (Field fd : fieldList) {
-                        if (fd.isAnnotationPresent(ZTable.class) && !fd.getAnnotation(ZTable.class).isAuto()) {
+                        if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
                             VALUES(fd.getName(), "?");
                             fList.add(fd);
                         }
@@ -191,7 +191,7 @@ public abstract class BaseService<T extends BaseEntity> {
                     Field fid = null;
                     UPDATE(t.getClass().getAnnotation(ZTable.class).tableName());
                     for (Field fd : fieldList) {
-                        if (fd.isAnnotationPresent(ZTable.class)&&!fd.getAnnotation(ZTable.class).isAuto()) {
+                        if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
                             PropertyDescriptor pd = new PropertyDescriptor(
                                     fd.getName(), t.getClass());
                             Method getMethod = pd.getReadMethod();
