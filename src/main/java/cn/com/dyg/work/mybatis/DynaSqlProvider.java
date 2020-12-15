@@ -48,7 +48,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 			{
 				INSERT_INTO(t.getClass().getAnnotation(ZTable.class).tableName());
 				for (Field fd : fieldList) {
-					if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore()))
+					if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&!fd.getAnnotation(DBField.class).isIgnore()))
 						VALUES(fd.getName(), "#{" + fd.getName() + "}");
 				}
 
@@ -83,7 +83,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		sql.append("insert into " + cls.getAnnotation(ZTable.class).tableName() + "(");
 		cols.append("(");
 		for (Field fd : fieldList) {
-			if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
+			if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&!fd.getAnnotation(DBField.class).isIgnore())) {
 				sql.append(fd.getName() + ",");
 				cols.append(MessageFormat.format("#'{'list[{0}].{1}'}'",
 						fd.getName()));
@@ -98,7 +98,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		for (int i = 0; i < list.size(); i++) {
 			sql.append("(");
 			for (Field fd : fieldList) {
-				if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
+				if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&!fd.getAnnotation(DBField.class).isIgnore())) {
 					sql.append(MessageFormat.format("#'{'list[{0}].{1}'}'", i,
 							fd.getName()));
 					sql.append(",");
@@ -135,7 +135,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		sql.append("insert into " + cls.getAnnotation(ZTable.class).tableName() + "(");
 		cols.append("(");
 		for (Field fd : fieldList) {
-			if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
+			if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&!fd.getAnnotation(DBField.class).isIgnore())) {
 				sql.append(fd.getName() + ",");
 				cols.append(MessageFormat.format("#'{'list[{0}].{1}'}'",
 						fd.getName()));
@@ -150,7 +150,7 @@ public class DynaSqlProvider<T extends BaseEntity> {
 		for (int i = 0; i < list.size(); i++) {
 			sql.append(" select ");
 			for (Field fd : fieldList) {
-				if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&fd.getAnnotation(DBField.class).isIgnore())) {
+				if (!fd.isAnnotationPresent(DBField.class)||(fd.isAnnotationPresent(DBField.class)&&!fd.getAnnotation(DBField.class).isIgnore())) {
 					sql.append(MessageFormat.format("#'{'list[{0}].{1}'}'", i,
 							fd.getName()));
 					sql.append(",");
